@@ -4,6 +4,8 @@ import java.util.*;
 
 public class Main {
 
+    private static Set<Set<Node>> totalCliques = new HashSet<Set<Node>>();
+
 
     public static void main(String[] args) throws IOException {
         Reader reader = new Reader();
@@ -23,7 +25,13 @@ public class Main {
         }
         else if ("-p3".equals(args[0])){
             findFullyConnectedNeighbours(graph);
+        }else if("-p4".equals(args[0])){
+            findAllCliques(graph);
+            System.out.println(totalCliques.size());
         }
+
+
+
 
         else throw new IOException();
     }
@@ -33,7 +41,6 @@ public class Main {
 
         //Sorts graph.nodes = returning sorted List of nodes.
         List<Node> SortedNodeList = sortNodes(graph.nodes());
-
         //now print nodes
         for (Node n : SortedNodeList) {
             System.out.print(n.name());
@@ -117,6 +124,66 @@ public class Main {
             }
         }
         return true;
+    }
+
+    public static void findAllCliques(Graph graph){
+        for(Node n :graph.nodes()){
+            for(Set<Node> set : findcliques(n)){
+                totalCliques.add(set);
+            }
+        }
+
+    }
+
+//creates all the biggest DIFFERENT cliques in graph
+    public static Set<Set<Node>> findcliques (Node main_node){
+        Set<Set<Node>> cliques = new HashSet();
+        for(Node n: main_node.neighbours()){
+            Set<Node> clique = new HashSet();
+            clique.add(main_node);
+            clique.add(n);
+            cliques.add(findClique(clique));
+        }
+        return cliques;
+    }
+
+    public static Set<Node> findClique (Set<Node> set){
+        boolean cont;
+        for(Node n :set.iterator().next().neighbours()){
+            cont = true;
+            for(Node m :set){
+                if(m.neighbours().contains(n) == false){
+                    cont = false;
+                    break;
+                }
+            }
+            //if true for all nodes' neighbours add that node
+            if(cont){
+                set.add(n);
+                findClique(set);
+            }
+        }
+        return set;
+    }
+
+
+    public static <T> Set<Set<T>> powerSet(Set<T> originalSet) {
+        Set<Set<T>> sets = new HashSet<Set<T>>();
+        if (originalSet.isEmpty()) {
+            sets.add(new HashSet<T>());
+            return sets;
+        }
+        List<T> list = new ArrayList<T>(originalSet);
+        T head = list.get(0);
+        Set<T> rest = new HashSet<T>(list.subList(1, list.size()));
+        for (Set<T> set : powerSet(rest)) {
+            Set<T> newSet = new HashSet<T>();
+            newSet.add(head);
+            newSet.addAll(set);
+            sets.add(newSet);
+            sets.add(set);
+        }
+        return sets;
     }
 
 }
